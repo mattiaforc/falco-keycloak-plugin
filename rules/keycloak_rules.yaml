@@ -1,0 +1,7 @@
+- rule: Keycloak event received
+  desc: Received keycloak event
+  condition: keycloak.admin.resourceType=USER
+  output: id=%keycloak.eventID error=%keycloak.error realmID=%keycloak.realmID
+  priority: WARNING
+  source: keycloak
+  tags: [keycloak]
