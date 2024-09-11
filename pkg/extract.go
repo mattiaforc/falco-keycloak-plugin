@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 
 	"github.com/falcosecurity/plugin-sdk-go/pkg/sdk"
 )
@@ -28,8 +29,8 @@ import (
 // Extract allows Falco plugin framework to get values for all available fields
 func (p *Plugin) Extract(req sdk.ExtractRequest, evt sdk.EventReader) error {
 	msg := p.lastKeycloakEventMessage
-	var userEvent KeycloakAdminEvent
-	var adminEvent KeycloakAdminEvent
+	userEvent := p.lastKeycloakUserEventMessage
+	adminEvent := p.lastKeycloakAdminEventMessage
 
 	// For avoiding to Unmarshal the same message for each field to extract
 	// we store it with its EventNum. When it's a new event with a new message, we
@@ -41,14 +42,19 @@ func (p *Plugin) Extract(req sdk.ExtractRequest, evt sdk.EventReader) error {
 			return err
 		}
 
-		err = json.Unmarshal(rawData, &msg)
-		if err != nil {
+		if err = json.Unmarshal(rawData, &msg); err != nil {
 			return err
 		}
-		json.Unmarshal(rawData, &userEvent)
-		json.Unmarshal(rawData, &adminEvent)
+		if err = json.Unmarshal(rawData, &userEvent); err != nil {
+			p.logger.Println("error unmarshalling as user event", err)
+		}
+		if err = json.Unmarshal(rawData, &adminEvent); err != nil {
+			p.logger.Println("error unmarshalling as admin event", err)
+		}
 
 		p.lastKeycloakEventMessage = msg
+		p.lastKeycloakAdminEventMessage = adminEvent
+		p.lastKeycloakUserEventMessage = userEvent
 		p.lastKeycloakEventNumber = evt.EventNum()
 	}
 
@@ -59,10 +65,43 @@ func (p *Plugin) Extract(req sdk.ExtractRequest, evt sdk.EventReader) error {
 		req.SetValue(msg.Error)
 	case "keycloak.realmID":
 		req.SetValue(msg.RealmID)
+
+	case "keycloak.user.eventType":
+		req.SetValue(userEvent.Type)
+	case "keycloak.user.clientID":
+		req.SetValue(userEvent.ClientID)
+	case "keycloak.user.userID":
+		req.SetValue(userEvent.UserID)
+	case "keycloak.user.sessionID":
+		req.SetValue(userEvent.SessionID)
+	case "keycloak.user.ipAddress":
+		ip := net.ParseIP(userEvent.IPAddress)
+		if ip != nil {
+			req.SetValue(ip)
+		}
+	case "keycloak.user.details":
+		req.SetValue(userEvent.Details)
+
+	case "keycloak.admin.authDetails.realmID":
+		req.SetValue(adminEvent.AuthDetails.RealmID)
+	case "keycloak.admin.authDetails.clientID":
+		req.SetValue(adminEvent.AuthDetails.ClientID)
+	case "keycloak.admin.authDetails.userID":
+		req.SetValue(adminEvent.AuthDetails.UserID)
+	case "keycloak.admin.authDetails.ipAddress":
+		ip := net.ParseIP(adminEvent.AuthDetails.IPAddress)
+		if ip != nil {
+			req.SetValue(ip)
+		}
 	case "keycloak.admin.resourceType":
 		req.SetValue(adminEvent.ResourceType)
+	case "keycloak.admin.operationType":
+		req.SetValue(adminEvent.OperationType)
+	case "keycloak.admin.resourcePath":
+		req.SetValue(adminEvent.ResourcePath)
+
 	default:
-		return fmt.Errorf("no known field: %s", req.Field())
+		return fmt.Errorf("unknown field: %s", req.Field())
 	}
 
 	return nil

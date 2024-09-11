@@ -132,15 +132,38 @@ func (p *Plugin) OpenWebServer(address, endpoint string, ssl bool) (source.Insta
 }
 
 func (p *Plugin) parseKeycloakEventAndPush(payload []byte, c chan<- source.PushEvent) {
-	var e BaseKeycloakEvent
-	if err := json.Unmarshal(payload, &e); err != nil {
-		p.logger.Println("error while unmarshaling keycloak event", err.Error())
-		return
+	v := &source.PushEvent{}
+
+	// Try as admin event
+	var adminEvent KeycloakAdminEvent
+	if err := json.Unmarshal(payload, &adminEvent); err == nil {
+		if adminEvent.ResourceType != "" {
+			// This is an admin event
+			v.Timestamp = time.UnixMilli(adminEvent.Time)
+			if err := json.Unmarshal([]byte(adminEvent.RepresentationRaw), &adminEvent.Representation); err != nil {
+				p.logger.Println("error unmarshalling the admin representation JSON", err)
+			}
+			adminEvent.RepresentationRaw = ""
+			modifiedPayload, err := json.Marshal(adminEvent)
+			if err != nil {
+				p.logger.Println("error marshalling back the payload JSON", err)
+				return
+			}
+			v.Data = modifiedPayload
+			c <- *v
+			return
+		}
 	}
 
-	v := &source.PushEvent{}
-	v.Timestamp = time.UnixMilli(e.Time)
-	v.Data = payload
-
-	c <- *v
+	// Try as user event
+	var userEvent KeycloakUserEvent
+	if err := json.Unmarshal(payload, &userEvent); err == nil {
+		if userEvent.Type != "" {
+			// This is an user event
+			v.Timestamp = time.UnixMilli(userEvent.Time)
+			v.Data = payload
+			c <- *v
+			return
+		}
+	}
 }

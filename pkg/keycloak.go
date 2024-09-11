@@ -44,8 +44,10 @@ type Plugin struct {
 	Config PluginConfig
 	logger *log.Logger
 
-	lastKeycloakEventMessage BaseKeycloakEvent // TODO: fix typing
-	lastKeycloakEventNumber  uint64
+	lastKeycloakEventMessage      BaseKeycloakEvent
+	lastKeycloakUserEventMessage  KeycloakUserEvent
+	lastKeycloakAdminEventMessage KeycloakAdminEvent
+	lastKeycloakEventNumber       uint64
 }
 
 // SetInfo is used to set the Info of the plugin

@@ -1,8 +1,5 @@
 package keycloak
 
-type EventType string
-type OperationType string
-
 type BaseKeycloakEvent struct {
 	ID      string `json:"id"`
 	Error   string `json:"error"`
@@ -10,14 +7,14 @@ type BaseKeycloakEvent struct {
 	Time    int64  `json:"time"`
 }
 
-type KeycloakEvent struct {
+type KeycloakUserEvent struct {
 	BaseKeycloakEvent
-	Type      EventType         `json:"type"`
-	ClientID  string            `json:"clientId"`
-	UserID    string            `json:"userId"`
-	SessionID string            `json:"sessionId"`
-	IPAddress string            `json:"ipAddress"`
-	Details   map[string]string `json:"details"`
+	Type      string      `json:"type"`
+	ClientID  string      `json:"clientId"`
+	UserID    string      `json:"userId"`
+	SessionID string      `json:"sessionId"`
+	IPAddress string      `json:"ipAddress"`
+	Details   interface{} `json:"details"`
 }
 
 type AuthDetails struct {
@@ -29,9 +26,10 @@ type AuthDetails struct {
 
 type KeycloakAdminEvent struct {
 	BaseKeycloakEvent
-	AuthDetails    AuthDetails   `json:"authDetails"`
-	ResourceType   string        `json:"resourceType"` // This is the resource the AdminEvent was triggered for.
-	OperationType  OperationType `json:"operationType"`
-	ResourcePath   string        `json:"resourcePath"`
-	Representation string        `json:"representation"`
+	AuthDetails       AuthDetails `json:"authDetails"`
+	ResourceType      string      `json:"resourceType"` // This is the resource the AdminEvent was triggered for.
+	OperationType     string      `json:"operationType"`
+	ResourcePath      string      `json:"resourcePath"`
+	RepresentationRaw string      `json:"representation"`
+	Representation    interface{}
 }
