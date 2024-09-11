@@ -24,6 +24,20 @@ sequenceDiagram
     Falco->> Falco Sidekick: Trigger rule forwarded to Falco <br/>Sidekick, handle however you like...
 ```
 
+## Installation
+
+With falcoctl:
+
+```bash
+falcoctl index add keycloak https://raw.githubusercontent.com/mattiaforc/falco-keycloak-plugin/main/index.yaml
+
+falcoctl artifact install keycloak
+
+# At this moment there are no default rules, only a few helpful macros to get started. 
+# I'm open to suggestions about default rules that we could include with this plugin, so feel free to submit a PR or open a issue! 
+falcoctl artifact install keycloak-rules
+```
+
 ## Configuration
 
 The plugin embeds a webserver that listens on a configurable port and accepts POST requests. The webserver of the plugin can be configuted as part of the plugin's init configuration and open parameters.

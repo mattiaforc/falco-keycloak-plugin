@@ -1,0 +1,28 @@
+- name: keycloak
+  type: plugin
+  registry: ghcr.io
+  repository: mattiaforc/falco-keycloak-plugin/plugin/keycloak
+  description: This plugin adds source and extraction capabilities to Falco to be able to ingest Keycloak user and admin events.
+  home: https://github.com/mattiaforc/falco-keycloak-plugin
+  keywords:
+    - keycloak
+  license: Apache-2.0
+  maintainers:
+    - email: mattiaforc@gmail.com
+      name: Mattia Forcellese
+  sources:
+    - https://github.com/mattiaforc/falco-keycloak-plugin
+- name: keycloak-rules
+  type: rulesfile
+  registry: ghcr.io
+  repository: mattiaforc/falco-keycloak-plugin/rules/keycloak
+  description: Rules for the keycloak plugin
+  home: https://github.com/mattiaforc/falco-keycloak-plugin/tree/main/rules
+  keywords:
+    - keycloak
+  license: Apache-2.0
+  maintainers:
+    - email: mattiaforc@gmail.com
+      name: Mattia Forcellese
+  sources:
+    - https://github.com/mattiaforc/falco-keycloak-plugin/tree/main/rules/keycloak_rules.yaml
