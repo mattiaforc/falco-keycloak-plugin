@@ -15,7 +15,7 @@
 - name: keycloak-rules
   type: rulesfile
   registry: ghcr.io
-  repository: mattiaforc/falco-keycloak-plugin/rules/keycloak
+  repository: mattiaforc/falco-keycloak-plugin/ruleset/keycloak
   description: Rules for the keycloak plugin
   home: https://github.com/mattiaforc/falco-keycloak-plugin/tree/main/rules
   keywords:
